@@ -1,0 +1,71 @@
+Group Members
+==============
+Member 1
+--------
+Name 	: Keshav Velhal
+SBU ID	: 110276432
+Email	: keshav.velhal@stonybrook.edu
+
+Member 2
+--------
+Name	: Neeraj Dixit
+SBU ID	: 109951838
+Email	: ndixit@cs.stonybrook.edu
+
+
+USER Documentation:
+===================
+- The complete assignment consists of 2 .C file namely tour.c & arp.c
+  and the Makefile and README
+- To compile the assignment just run the command 'make' in the assignment
+  directory
+- To clean the executable files just run the command 'make clean' in the
+  assignment directory
+- First deploy the the three execulable files arp & tour (Deploy ARP first)
+   e.g:
+  ~/cse533/deploy_app arp
+  ~/cse533/deploy_app tour (NO arguements)
+- Then to start a tour from any VM, kill the earlier tour process and start a
+  new tour with command line arguements consisting of VM names
+ 
+ 
+System Documentation:  
+==================== 
+  1. TOUR:
+	 - The tour module is responsible for creating the rt socket, pg socket and invoking ARP resolution
+	 - The tour module sends the route traversal packets along the tour path
+	 - Every tour module after reception of route traversal packet:
+		a) Joins the multicast group
+		b) Forwards the packet to next VM via 'rt' socket. The tour module receives all route
+		   traversal packets on 'rt' socket
+		c) The tour module communicates with ARP via a UNIX domain socket which is type SOCK_STREAM.
+		   The ARP module returns the hardware address of the destination node.
+		d) After getting hardware address, the tour module sends a PING request packet to the destination
+		   through the packet socket
+		e) The ping packet is interpreted by the kernel and the PING reply sent is received on
+		   the 'pg' socket
+		f) If it is the last node in tour, it sends out a multicast message to the multicast address
+		g) After reception of multicast message, every node responds to this message by sending a
+		   multicast message back. (Each node receives N multicast messages with a tour of N nodes)
+	 
+  2. ARP:
+	 - The ARP module is responsible for doing the ARP resolution for the IP address given by tour module
+	 - ARP module listens to UNIX domain socket for ARP resolution request from tour module
+	 - After reception of request for ARP resolution, it checks ARP cache for availability of HW address
+	   of destination. If present, a reply is sent to tour module immediately.
+	 - If HW address is not available, it sends a ARP request to the broadcast MAC address (ff:ff:ff:ff:ff:ff)
+	 - All machines receiving ARP request update their ARP cache
+	 - All the nodes in network receive this ARP request and the intended node replies with ARP reply
+	 - The machine receiving the ARP reply updates its ARP cache and responds to the tour module via the
+	   UNIX domain socket
+	 
+	 
+Test Documentation:
+=====================
+1) The program is tested for all input values (as per assignment requirements)
+2) Appropriate print statements are added to better understand the working of assignment
+
+
+References:
+=============
+http://www.tenouk.com/Module43a.html
